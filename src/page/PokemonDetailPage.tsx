@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Spinner from './Spinner';
 import { useParams, Link } from 'react-router-dom';
 
 type Pokemon = {
@@ -33,7 +34,7 @@ const PokemonDetailPage: React.FC = () => {
   return (
     <div style={{ maxWidth: 500, margin: '2rem auto', padding: '2rem 1.5rem', background: 'var(--card-bg)', borderRadius: 16, color: 'var(--text)', boxShadow: '0 2px 12px rgba(0,0,0,0.15)', minHeight: 400 }}>
       <Link to="/pokemon" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 500, fontSize: 16 }}>&larr; Volver a la lista</Link>
-      {loading && <p style={{ color: 'var(--accent)', textAlign: 'center' }}>Cargando...</p>}
+      {loading && <Spinner size={64} />}
       {error && <p style={{ color: '#ff4f4f', textAlign: 'center' }}>{error}</p>}
       {pokemon && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, marginTop: 24 }}>

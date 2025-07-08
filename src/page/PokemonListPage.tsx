@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Spinner from './Spinner';
 import { useNavigate } from 'react-router-dom';
 
 type Pokemon = {
@@ -13,10 +14,15 @@ type Pokemon = {
 const PokemonListPage: React.FC = () => {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [page, setPage] = useState<number>(0);
+  const [inputPage, setInputPage] = useState<string>('1');
   const [size, setSize] = useState<number>(5);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setInputPage((page + 1).toString());
+  }, [page]);
 
   useEffect(() => {
     setLoading(true);
@@ -35,7 +41,19 @@ const PokemonListPage: React.FC = () => {
   const handleNext = () => setPage(p => p + 1);
 
   return (
-    <div style={{ maxWidth: 700, margin: '2rem auto', padding: '1rem', background: 'var(--bg)', minHeight: '100vh', color: 'var(--text)', fontFamily: 'Inter, Arial, sans-serif' }}>
+    <div style={{
+      maxWidth: 700,
+      margin: '2rem auto',
+      padding: '1rem',
+      background: 'var(--bg)',
+      minHeight: '100vh',
+      color: 'var(--text)',
+      fontFamily: 'Inter, Arial, sans-serif',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100vh',
+      boxSizing: 'border-box',
+    }}>
       <h1 style={{ textAlign: 'center', color: 'var(--accent)', letterSpacing: 1 }}>Pokémon List</h1>
       <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
         <label htmlFor="size-select" style={{ color: 'var(--text)' }}>Pokémon por página: </label>
@@ -43,6 +61,7 @@ const PokemonListPage: React.FC = () => {
           id="size-select"
           value={size}
           onChange={e => { setSize(Number(e.target.value)); setPage(0); }}
+          disabled={loading}
           style={{
             background: 'var(--select-bg)',
             color: 'var(--select-text)',
@@ -60,46 +79,72 @@ const PokemonListPage: React.FC = () => {
           <option value={20}>20</option>
         </select>
       </div>
-      {loading && <p style={{ color: 'var(--accent)', textAlign: 'center' }}>Cargando...</p>}
       {error && <p style={{ color: '#ff4f4f', textAlign: 'center' }}>{error}</p>}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-        {pokemons.map((poke: Pokemon) => (
-          <div
-            key={poke.id}
-            onClick={() => navigate(`/pokemon/${poke.id}`)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              border: '1.5px solid var(--border)',
-              borderRadius: 12,
-              padding: 16,
-              background: 'var(--card-bg)',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-              gap: 20,
-              transition: 'transform 0.15s',
-              cursor: 'pointer',
-            }}
-          >
-            <img
-              src={poke.frontDefault}
-              alt={poke.name}
-              width={80}
-              height={80}
-              style={{ marginRight: 20, background: '#222', borderRadius: 8, border: '2px solid var(--border)' }}
-            />
-            <div>
-              <h2 style={{ margin: 0, textTransform: 'capitalize', color: 'var(--accent)', fontSize: 22 }}>{poke.name}</h2>
-              <div style={{ fontSize: 15, margin: '4px 0' }}>Tipos: <span style={{ color: '#ffd86b' }}>{poke.typeList.join(', ')}</span></div>
-              <div style={{ fontSize: 15, margin: '4px 0' }}>Habilidades: <span style={{ color: '#7ee787' }}>{poke.abilitiesList.join(', ')}</span></div>
-              <div style={{ fontSize: 15, margin: '4px 0' }}>Peso: <span style={{ color: '#8ab4f8' }}>{poke.weight}</span></div>
+      <div style={{ position: 'relative', flex: 1, minHeight: 0, marginBottom: 24 }}>
+        <div style={{
+          height: '100%',
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1.2rem',
+          filter: loading ? 'blur(2px)' : 'none',
+          pointerEvents: loading ? 'none' : 'auto',
+          transition: 'filter 0.2s',
+        }}>
+          {pokemons.map((poke: Pokemon) => (
+            <div
+              key={poke.id}
+              onClick={() => navigate(`/pokemon/${poke.id}`)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                border: '1.5px solid var(--border)',
+                borderRadius: 12,
+                padding: 16,
+                background: 'var(--card-bg)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+                gap: 20,
+                transition: 'transform 0.15s',
+                cursor: 'pointer',
+              }}
+            >
+              <img
+                src={poke.frontDefault}
+                alt={poke.name}
+                width={80}
+                height={80}
+                style={{ marginRight: 20, background: '#222', borderRadius: 8, border: '2px solid var(--border)' }}
+              />
+              <div>
+                <h2 style={{ margin: 0, textTransform: 'capitalize', color: 'var(--accent)', fontSize: 22 }}>{poke.name}</h2>
+                <div style={{ fontSize: 15, margin: '4px 0' }}>Tipos: <span style={{ color: '#ffd86b' }}>{poke.typeList.join(', ')}</span></div>
+                <div style={{ fontSize: 15, margin: '4px 0' }}>Habilidades: <span style={{ color: '#7ee787' }}>{poke.abilitiesList.join(', ')}</span></div>
+                <div style={{ fontSize: 15, margin: '4px 0' }}>Peso: <span style={{ color: '#8ab4f8' }}>{poke.weight}</span></div>
+              </div>
             </div>
+          ))}
+        </div>
+        {loading && (
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(24,28,32,0.45)',
+            zIndex: 2,
+          }}>
+            <Spinner size={56} />
           </div>
-        ))}
+        )}
       </div>
-      <div style={{ marginTop: 32, display: 'flex', gap: 12, justifyContent: 'center' }}>
+      <div style={{ marginTop: 32, display: 'flex', gap: 12, justifyContent: 'center', alignItems: 'center' }}>
         <button
           onClick={handlePrev}
-          disabled={page === 0}
+          disabled={page === 0 || loading}
           style={{
             background: page === 0 ? 'var(--button-disabled)' : 'var(--button-bg)',
             color: 'var(--button-text)',
@@ -112,10 +157,37 @@ const PokemonListPage: React.FC = () => {
             fontWeight: 500,
           }}
         >Anterior</button>
-        <span style={{ alignSelf: 'center', fontSize: 16, color: 'var(--text)' }}>Página {page + 1}</span>
+        <span style={{ alignSelf: 'center', fontSize: 16, color: 'var(--text)' }}>Página</span>
+        <input
+          type="number"
+          min={1}
+          value={inputPage}
+          onChange={e => {
+            setInputPage(e.target.value.replace(/^0+/, ''));
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              const val = Number(inputPage);
+              if (!isNaN(val) && val > 0) setPage(val - 1);
+            }
+          }}
+          disabled={loading}
+          style={{
+            width: 60,
+            padding: '6px 8px',
+            borderRadius: 6,
+            border: '1.5px solid var(--border)',
+            background: 'var(--card-bg)',
+            color: 'var(--text)',
+            fontSize: 16,
+            textAlign: 'center',
+            outline: 'none',
+          }}
+        />
+        <span style={{ alignSelf: 'center', fontSize: 16, color: 'var(--text)' }}>/</span>
         <button
           onClick={handleNext}
-          disabled={pokemons.length < size}
+          disabled={pokemons.length < size || loading}
           style={{
             background: pokemons.length < size ? 'var(--button-disabled)' : 'var(--button-bg)',
             color: 'var(--button-text)',
