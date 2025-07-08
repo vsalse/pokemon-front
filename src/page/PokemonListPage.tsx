@@ -76,7 +76,6 @@ const PokemonListPage: React.FC = () => {
           <option value={3}>3</option>
           <option value={5}>5</option>
           <option value={10}>10</option>
-          <option value={20}>20</option>
         </select>
       </div>
       {error && <p style={{ color: '#ff4f4f', textAlign: 'center' }}>{error}</p>}
@@ -111,14 +110,28 @@ const PokemonListPage: React.FC = () => {
               <img
                 src={poke.frontDefault}
                 alt={poke.name}
-                width={80}
-                height={80}
+                width={110}
+                height={110}
                 style={{ marginRight: 20, background: '#222', borderRadius: 8, border: '2px solid var(--border)' }}
               />
               <div>
                 <h2 style={{ margin: 0, textTransform: 'capitalize', color: 'var(--accent)', fontSize: 22 }}>{poke.name}</h2>
-                <div style={{ fontSize: 15, margin: '4px 0' }}>Tipos: <span style={{ color: '#ffd86b' }}>{poke.typeList.join(', ')}</span></div>
-                <div style={{ fontSize: 15, margin: '4px 0' }}>Habilidades: <span style={{ color: '#7ee787' }}>{poke.abilitiesList.join(', ')}</span></div>
+                <div style={{ fontSize: 15, margin: '4px 0' }}>
+                  Tipos:
+                  <ul style={{ color: '#ffd86b', margin: 0, paddingLeft: 20, listStyle: 'none' }}>
+                    {poke.typeList.map((type, idx) => (
+                      <li key={idx} style={{ paddingLeft: 0, marginBottom: 2 }}>• {type}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div style={{ fontSize: 15, margin: '4px 0' }}>
+                  Habilidades:
+                  <ul style={{ color: '#7ee787', margin: 0, paddingLeft: 20, listStyle: 'none' }}>
+                    {poke.abilitiesList.map((ability, idx) => (
+                      <li key={idx} style={{ paddingLeft: 0, marginBottom: 2 }}>• {ability}</li>
+                    ))}
+                  </ul>
+                </div>
                 <div style={{ fontSize: 15, margin: '4px 0' }}>Peso: <span style={{ color: '#8ab4f8' }}>{poke.weight}</span></div>
               </div>
             </div>

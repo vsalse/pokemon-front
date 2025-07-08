@@ -9,6 +9,8 @@ type Pokemon = {
   typeList: string[];
   abilitiesList: string[];
   weight: number;
+  height: number;
+  species: string;
 };
 
 const PokemonDetailPage: React.FC = () => {
@@ -37,13 +39,48 @@ const PokemonDetailPage: React.FC = () => {
       {loading && <Spinner size={64} />}
       {error && <p style={{ color: '#ff4f4f', textAlign: 'center' }}>{error}</p>}
       {pokemon && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, marginTop: 24 }}>
-          <img src={pokemon.frontDefault} alt={pokemon.name} width={120} height={120} style={{ background: '#222', borderRadius: 12, border: '2px solid var(--border)' }} />
-          <h1 style={{ textTransform: 'capitalize', color: 'var(--accent)', margin: 0 }}>{pokemon.name}</h1>
-          <div style={{ fontSize: 17, margin: '6px 0' }}>ID: <span style={{ color: '#ffd86b' }}>{pokemon.id}</span></div>
-          <div style={{ fontSize: 17, margin: '6px 0' }}>Tipos: <span style={{ color: '#ffd86b' }}>{pokemon.typeList.join(', ')}</span></div>
-          <div style={{ fontSize: 17, margin: '6px 0' }}>Habilidades: <span style={{ color: '#7ee787' }}>{pokemon.abilitiesList.join(', ')}</span></div>
-          <div style={{ fontSize: 17, margin: '6px 0' }}>Peso: <span style={{ color: '#8ab4f8' }}>{pokemon.weight}</span></div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, marginTop: 32 }}>
+          <img src={pokemon.frontDefault} alt={pokemon.name} width={180} height={180} style={{ background: '#222', borderRadius: 16, border: '3px solid var(--accent)', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }} />
+          <h1 style={{ textTransform: 'capitalize', color: 'var(--accent)', margin: '0 0 8px 0', fontSize: 36, letterSpacing: 1 }}>{pokemon.name}</h1>
+          <div style={{
+            fontSize: 18,
+            margin: '16px 0 10px 0',
+            color: '#222',
+            textAlign: 'left',
+            whiteSpace: 'pre-line',
+            maxWidth: 420,
+            background: 'linear-gradient(90deg, #ffe082 0%, #fffde4 100%)',
+            borderRadius: 12,
+            border: '2px solid #e2b714',
+            boxShadow: '0 2px 8px rgba(226,183,20,0.10)',
+            padding: '18px 20px',
+            fontWeight: 500,
+            letterSpacing: 0.2,
+          }}>
+            <span style={{ color: '#b48a00', fontWeight: 700, fontSize: 19 }}>Descripción:</span><br />
+            {pokemon.species.replace(/\n/g, ' ')}
+          </div>
+          <div style={{ display: 'flex', gap: 32, margin: '18px 0 0 0', width: '100%', justifyContent: 'center' }}>
+            <div style={{ fontSize: 18 }}>ID: <span style={{ color: '#ffd86b', fontWeight: 500 }}>{pokemon.id}</span></div>
+            <div style={{ fontSize: 18 }}>Peso: <span style={{ color: '#8ab4f8', fontWeight: 500 }}>{pokemon.weight}</span></div>
+            <div style={{ fontSize: 18 }}>Altura: <span style={{ color: '#8ab4f8', fontWeight: 500 }}>{pokemon.height}</span></div>
+          </div>
+          <div style={{ fontSize: 18, margin: '18px 0 0 0', width: '100%' }}>
+            <strong>Tipos:</strong>
+            <ul style={{ color: '#ffd86b', margin: 0, paddingLeft: 20, listStyle: 'none', fontSize: 17 }}>
+              {pokemon.typeList.map((type, idx) => (
+                <li key={idx} style={{ paddingLeft: 0, marginBottom: 2 }}>• {type}</li>
+              ))}
+            </ul>
+          </div>
+          <div style={{ fontSize: 18, margin: '18px 0 0 0', width: '100%' }}>
+            <strong>Habilidades:</strong>
+            <ul style={{ color: '#7ee787', margin: 0, paddingLeft: 20, listStyle: 'none', fontSize: 17 }}>
+              {pokemon.abilitiesList.map((ability, idx) => (
+                <li key={idx} style={{ paddingLeft: 0, marginBottom: 2 }}>• {ability}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
     </div>
