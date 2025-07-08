@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 type Pokemon = {
   id: number;
@@ -15,6 +16,7 @@ const PokemonListPage: React.FC = () => {
   const [size, setSize] = useState<number>(5);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setLoading(true);
@@ -64,6 +66,7 @@ const PokemonListPage: React.FC = () => {
         {pokemons.map((poke: Pokemon) => (
           <div
             key={poke.id}
+            onClick={() => navigate(`/pokemon/${poke.id}`)}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -74,6 +77,7 @@ const PokemonListPage: React.FC = () => {
               boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
               gap: 20,
               transition: 'transform 0.15s',
+              cursor: 'pointer',
             }}
           >
             <img
