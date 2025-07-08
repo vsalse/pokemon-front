@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Spinner from './Spinner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 type Pokemon = {
   id: number;
@@ -13,15 +13,18 @@ type Pokemon = {
 
 const PokemonListPage: React.FC = () => {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
-  const [page, setPage] = useState<number>(0);
   const [inputPage, setInputPage] = useState<string>('1');
   const [size, setSize] = useState<number>(5);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = Number(searchParams.get('page') || 1) - 1;
 
   useEffect(() => {
     setInputPage((page + 1).toString());
+    // Guardar la última página visitada en sessionStorage
+    sessionStorage.setItem('lastPokemonPage', (page + 1).toString());
   }, [page]);
 
   useEffect(() => {
@@ -38,13 +41,19 @@ const PokemonListPage: React.FC = () => {
       .finally(() => setLoading(false));
   }, [page, size]);
 
-  const handlePrev = () => setPage(p => Math.max(0, p - 1));
-  const handleNext = () => setPage(p => p + 1);
+  const setPageParam = (newPage: number) => {
+    setSearchParams(params => {
+      params.set('page', (newPage + 1).toString());
+      return params;
+    });
+  };
+  const handlePrev = () => setPageParam(Math.max(0, page - 1));
+  const handleNext = () => setPageParam(page + 1);
 
   return (
     <div style={{
       maxWidth: 700,
-      margin: '2rem auto',
+      margin: '0 auto',
       padding: '1rem',
       background: 'var(--bg)',
       minHeight: '100vh',
@@ -55,13 +64,13 @@ const PokemonListPage: React.FC = () => {
       height: '100vh',
       boxSizing: 'border-box',
     }}>
-      <h1 style={{ textAlign: 'center', color: 'var(--accent)', letterSpacing: 1 }}>Pokémon List</h1>
+      <h1 style={{ textAlign: 'center', color: 'var(--accent)', letterSpacing: 1, margin: 0, marginBottom: '1.2rem' }}>Pokémon List</h1>
       <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
         <label htmlFor="size-select" style={{ color: 'var(--text)' }}>Pokémon por página: </label>
         <select
           id="size-select"
           value={size}
-          onChange={e => { setSize(Number(e.target.value)); setPage(0); }}
+          onChange={e => { setSize(Number(e.target.value)); setPageParam(0); }}
           disabled={loading}
           style={{
             background: 'var(--select-bg)',
@@ -108,15 +117,17 @@ const PokemonListPage: React.FC = () => {
                 cursor: 'pointer',
               }}
             >
-              <img
-                src={poke.imageList}
-                alt={poke.name}
-                width={110}
-                height={110}
-                style={{ marginRight: 20, background: '#222', borderRadius: 8, border: '2px solid var(--border)' }}
-              />
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 20, minWidth: 120 }}>
+                <h2 style={{ margin: '0 0 8px 0', textTransform: 'capitalize', color: 'var(--accent)', fontSize: 22, textAlign: 'center' }}>{poke.name}</h2>
+                <img
+                  src={poke.imageList}
+                  alt={poke.name}
+                  width={110}
+                  height={110}
+                  style={{ background: '#222', borderRadius: 8, border: '2px solid var(--border)', display: 'block' }}
+                />
+              </div>
               <div>
-                <h2 style={{ margin: 0, textTransform: 'capitalize', color: 'var(--accent)', fontSize: 22 }}>{poke.name}</h2>
                 <div style={{ fontSize: 15, margin: '4px 0' }}>
                   Tipos:
                   <ul style={{ color: '#ffd86b', margin: 0, paddingLeft: 20, listStyle: 'none' }}>
@@ -182,7 +193,7 @@ const PokemonListPage: React.FC = () => {
           onKeyDown={e => {
             if (e.key === 'Enter') {
               const val = Number(inputPage);
-              if (!isNaN(val) && val > 0) setPage(val - 1);
+              if (!isNaN(val) && val > 0) setPageParam(val - 1);
             }
           }}
           disabled={loading}

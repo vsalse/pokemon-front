@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Spinner from './Spinner';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 
 type Pokemon = {
   id: number;
@@ -19,6 +19,9 @@ const PokemonDetailPage: React.FC = () => {
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -37,7 +40,22 @@ const PokemonDetailPage: React.FC = () => {
 
   return (
     <div style={{ maxWidth: 500, margin: '2rem auto', padding: '2rem 1.5rem', background: 'var(--card-bg)', borderRadius: 16, color: 'var(--text)', boxShadow: '0 2px 12px rgba(0,0,0,0.15)', minHeight: 400 }}>
-      <Link to="/pokemon" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 500, fontSize: 16 }}>&larr; Volver a la lista</Link>
+      <button
+        onClick={() => navigate(-1)}
+        style={{
+          color: 'var(--accent)',
+          background: 'none',
+          border: 'none',
+          fontWeight: 500,
+          fontSize: 16,
+          cursor: 'pointer',
+          padding: 0,
+          marginBottom: 8,
+          outline: 'none',
+        }}
+      >
+        &larr; Volver a la lista
+      </button>
       {loading && <Spinner size={64} />}
       {error && <p style={{ color: '#ff4f4f', textAlign: 'center' }}>{error}</p>}
       {pokemon && (
@@ -52,8 +70,23 @@ const PokemonDetailPage: React.FC = () => {
             alignItems: 'center',
             justifyContent: 'center',
             marginBottom: 8,
+            minHeight: 196,
+            minWidth: 196,
+            position: 'relative',
           }}>
-            <img src={pokemon.imageDetail} alt={pokemon.name} width={180} height={180} style={{ background: 'transparent', borderRadius: 12, display: 'block' }} />
+            {!imageLoaded && (
+              <div style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1 }}>
+                <Spinner size={48} />
+              </div>
+            )}
+            <img
+              src={pokemon.imageDetail}
+              alt={pokemon.name}
+              width={180}
+              height={180}
+              style={{ background: 'transparent', borderRadius: 12, display: imageLoaded ? 'block' : 'none' }}
+              onLoad={() => setImageLoaded(true)}
+            />
           </div>
           <h1 style={{ textTransform: 'capitalize', color: 'var(--accent)', margin: '0 0 8px 0', fontSize: 36, letterSpacing: 1 }}>{pokemon.name}</h1>
           <div style={{
