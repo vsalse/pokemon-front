@@ -1,5 +1,5 @@
 import React from 'react';
-import PokemonListPage from './PokemonListPage';
+import PokemonListPage from './page/PokemonListPage';
 
 const App: React.FC = () => {
   return <PokemonListPage />;

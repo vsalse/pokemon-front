@@ -5,6 +5,23 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--bg);
+  color: var(--text);
+}
+
+:root {
+  --bg: #181c20;
+  --card-bg: #23272f;
+  --text: #f3f6fa;
+  --accent: #4f8cff;
+  --border: #2c313a;
+  --button-bg: #23272f;
+  --button-hover: #4f8cff;
+  --button-text: #f3f6fa;
+  --button-disabled: #444a56;
+  --select-bg: #23272f;
+  --select-text: #f3f6fa;
+  --select-border: #4f8cff;
 }
 
 code {
