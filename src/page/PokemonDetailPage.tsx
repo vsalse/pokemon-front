@@ -5,7 +5,8 @@ import { useParams, Link } from 'react-router-dom';
 type Pokemon = {
   id: number;
   name: string;
-  frontDefault: string;
+  imageList: string;
+  imageDetail: string;
   typeList: string[];
   abilitiesList: string[];
   weight: number;
@@ -23,7 +24,8 @@ const PokemonDetailPage: React.FC = () => {
     if (!id) return;
     setLoading(true);
     setError(null);
-    fetch(`http://localhost:8080/pokemon/${id}`)
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+    fetch(`${apiUrl}/pokemon/${id}`)
       .then(res => {
         if (!res.ok) throw new Error('Error al obtener el Pokémon');
         return res.json();
@@ -40,7 +42,19 @@ const PokemonDetailPage: React.FC = () => {
       {error && <p style={{ color: '#ff4f4f', textAlign: 'center' }}>{error}</p>}
       {pokemon && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24, marginTop: 32 }}>
-          <img src={pokemon.frontDefault} alt={pokemon.name} width={180} height={180} style={{ background: '#222', borderRadius: 16, border: '3px solid var(--accent)', boxShadow: '0 4px 24px rgba(0,0,0,0.18)' }} />
+          <div style={{
+            background: 'linear-gradient(90deg, #ffe082 0%, #fffde4 100%)',
+            borderRadius: 16,
+            border: '3px solid #e2b714',
+            boxShadow: '0 4px 24px rgba(226,183,20,0.18)',
+            padding: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 8,
+          }}>
+            <img src={pokemon.imageDetail} alt={pokemon.name} width={180} height={180} style={{ background: 'transparent', borderRadius: 12, display: 'block' }} />
+          </div>
           <h1 style={{ textTransform: 'capitalize', color: 'var(--accent)', margin: '0 0 8px 0', fontSize: 36, letterSpacing: 1 }}>{pokemon.name}</h1>
           <div style={{
             fontSize: 18,

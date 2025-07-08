@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 type Pokemon = {
   id: number;
   name: string;
-  frontDefault: string;
+  imageList: string;
   typeList: string[];
   abilitiesList: string[];
   weight: number;
@@ -27,7 +27,8 @@ const PokemonListPage: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`http://localhost:8080/pokemon?page=${page}&size=${size}`)
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+    fetch(`${apiUrl}/pokemon?page=${page}&size=${size}`)
       .then(res => {
         if (!res.ok) throw new Error('Error al obtener los Pokémon');
         return res.json();
@@ -108,7 +109,7 @@ const PokemonListPage: React.FC = () => {
               }}
             >
               <img
-                src={poke.frontDefault}
+                src={poke.imageList}
                 alt={poke.name}
                 width={110}
                 height={110}
