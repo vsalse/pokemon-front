@@ -119,13 +119,27 @@ const PokemonListPage: React.FC = () => {
             >
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginRight: 20, minWidth: 120 }}>
                 <h2 style={{ margin: '0 0 8px 0', textTransform: 'capitalize', color: 'var(--accent)', fontSize: 22, textAlign: 'center' }}>{poke.name}</h2>
-                <img
-                  src={poke.imageList}
-                  alt={poke.name}
-                  width={110}
-                  height={110}
-                  style={{ background: '#222', borderRadius: 8, border: '2px solid var(--border)', display: 'block' }}
-                />
+                <div style={{
+                  background: 'linear-gradient(90deg, #ffe082 0%, #fffde4 100%)',
+                  borderRadius: 16,
+                  border: '3px solid #e2b714',
+                  boxShadow: '0 4px 24px rgba(226,183,20,0.18)',
+                  padding: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 4,
+                  minWidth: 110,
+                  minHeight: 110,
+                }}>
+                  <img
+                    src={poke.imageList}
+                    alt={poke.name}
+                    width={110}
+                    height={110}
+                    style={{ background: 'transparent', borderRadius: 8, display: 'block' }}
+                  />
+                </div>
               </div>
               <div>
                 <div style={{ fontSize: 15, margin: '4px 0' }}>

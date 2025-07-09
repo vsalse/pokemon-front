@@ -2,6 +2,11 @@ import React, { useEffect, useState } from 'react';
 import Spinner from './Spinner';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 
+type PokemonSpecies = {
+  evolutionChainUrl: string;
+  flavorText: string;
+};
+
 type Pokemon = {
   id: number;
   name: string;
@@ -11,12 +16,18 @@ type Pokemon = {
   abilitiesList: string[];
   weight: number;
   height: number;
-  species: string;
+  species: PokemonSpecies;
+};
+
+type PokemonDetailResponse = {
+  data: Pokemon;
+  evolutionList: Pokemon[][];
 };
 
 const PokemonDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
+  const [evolutionList, setEvolutionList] = useState<Pokemon[][]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const location = useLocation();
@@ -33,7 +44,10 @@ const PokemonDetailPage: React.FC = () => {
         if (!res.ok) throw new Error('Error al obtener el Pokémon');
         return res.json();
       })
-      .then((data: Pokemon) => setPokemon(data))
+      .then((data: PokemonDetailResponse) => {
+        setPokemon(data.data);
+        setEvolutionList(data.evolutionList);
+      })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
   }, [id]);
@@ -105,7 +119,7 @@ const PokemonDetailPage: React.FC = () => {
             letterSpacing: 0.2,
           }}>
             <span style={{ color: '#b48a00', fontWeight: 700, fontSize: 19 }}>Descripción:</span><br />
-            {pokemon.species.replace(/\n/g, ' ')}
+            {pokemon.species.flavorText.replace(/\n/g, ' ')}
           </div>
           <div style={{ display: 'flex', gap: 32, margin: '18px 0 0 0', width: '100%', justifyContent: 'center' }}>
             <div style={{ fontSize: 18 }}>ID: <span style={{ color: '#ffd86b', fontWeight: 500 }}>{pokemon.id}</span></div>
