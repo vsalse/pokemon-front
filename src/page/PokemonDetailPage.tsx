@@ -3,6 +3,41 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import Spinner from './Spinner';
 import ImageWithLoader from './ImageWithLoader';
 
+function Toast({ message, onClose }: { message: string, onClose: () => void }) {
+  const [visible, setVisible] = React.useState(false);
+  React.useEffect(() => {
+    if (!message) return;
+    setVisible(true);
+    const timer = setTimeout(() => setVisible(false), 2700);
+    const timer2 = setTimeout(onClose, 3000);
+    return () => { clearTimeout(timer); clearTimeout(timer2); };
+  }, [message, onClose]);
+  if (!message && !visible) return null;
+  return (
+    <div style={{
+      position: 'fixed',
+      left: '50%',
+      bottom: 32,
+      transform: `translateX(-50%) translateY(${visible ? '0' : '120%'})`,
+      opacity: visible ? 1 : 0,
+      transition: 'transform 0.4s cubic-bezier(.4,1.3,.6,1), opacity 0.3s',
+      background: 'linear-gradient(90deg,#ff4f4f 60%,#e2b714 100%)',
+      color: '#fff',
+      padding: '16px 36px',
+      borderRadius: 14,
+      fontWeight: 700,
+      fontSize: 18,
+      boxShadow: '0 4px 24px #0007',
+      zIndex: 9999,
+      minWidth: 240,
+      textAlign: 'center',
+      letterSpacing: 0.5,
+      border: '2px solid #fff',
+      pointerEvents: 'none',
+    }}>{message}</div>
+  );
+}
+
 interface PokemonDetail {
   id: number;
   name: string;
@@ -57,14 +92,11 @@ const PokemonDetailPage: React.FC = () => {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (error) {
-    return <div style={{ color: '#ff4f4f', textAlign: 'center', marginTop: 40 }}>{error}</div>;
-  }
-
   if (!pokemon) return null;
 
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', padding: 24, minHeight: 600, position: 'relative' }}>
+      <Toast message={error || ''} onClose={() => setError(null)} />
       {/* Spinner centrado y fondo difuminado mientras loading */}
       {loading && (
         <div style={{
@@ -129,9 +161,27 @@ const PokemonDetailPage: React.FC = () => {
                       <div
                         key={poke.id}
                         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 8, cursor: isCurrent ? 'default' : 'pointer', opacity: isCurrent ? 1 : 0.92 }}
-                        onClick={() => { if (!isCurrent) navigate(`/pokemon/${poke.id}`); }}
+                        onClick={() => { 
+                          if (!isCurrent) {
+                            const page = searchParams.get('page');
+                            if (page) {
+                              navigate(`/pokemon/${poke.id}?page=${page}`);
+                            } else {
+                              navigate(`/pokemon/${poke.id}`);
+                            }
+                          }
+                        }}
                         tabIndex={isCurrent ? -1 : 0}
-                        onKeyDown={e => { if (!isCurrent && e.key === 'Enter') navigate(`/pokemon/${poke.id}`); }}
+                        onKeyDown={e => { 
+                          if (!isCurrent && e.key === 'Enter') {
+                            const page = searchParams.get('page');
+                            if (page) {
+                              navigate(`/pokemon/${poke.id}?page=${page}`);
+                            } else {
+                              navigate(`/pokemon/${poke.id}`);
+                            }
+                          }
+                        }}
                         aria-label={isCurrent ? undefined : `Ver detalle de ${poke.name}`}
                       >
                         <div style={{

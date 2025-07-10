@@ -3,6 +3,41 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Spinner from './Spinner';
 import ImageWithLoader from './ImageWithLoader';
 
+function Toast({ message, onClose }: { message: string, onClose: () => void }) {
+  const [visible, setVisible] = React.useState(false);
+  React.useEffect(() => {
+    if (!message) return;
+    setVisible(true);
+    const timer = setTimeout(() => setVisible(false), 2700);
+    const timer2 = setTimeout(onClose, 3000);
+    return () => { clearTimeout(timer); clearTimeout(timer2); };
+  }, [message, onClose]);
+  if (!message && !visible) return null;
+  return (
+    <div style={{
+      position: 'fixed',
+      left: '50%',
+      bottom: 32,
+      transform: `translateX(-50%) translateY(${visible ? '0' : '120%'})`,
+      opacity: visible ? 1 : 0,
+      transition: 'transform 0.4s cubic-bezier(.4,1.3,.6,1), opacity 0.3s',
+      background: 'linear-gradient(90deg,#ff4f4f 60%,#e2b714 100%)',
+      color: '#fff',
+      padding: '16px 36px',
+      borderRadius: 14,
+      fontWeight: 700,
+      fontSize: 18,
+      boxShadow: '0 4px 24px #0007',
+      zIndex: 9999,
+      minWidth: 240,
+      textAlign: 'center',
+      letterSpacing: 0.5,
+      border: '2px solid #fff',
+      pointerEvents: 'none',
+    }}>{message}</div>
+  );
+}
+
 interface Pokemon {
   id: number;
   name: string;
@@ -12,8 +47,14 @@ interface Pokemon {
   weight: number;
 }
 
+interface PokeListModel {
+  recordCount: number;
+  list: Pokemon[];
+}
+
 const PokemonListPage: React.FC = () => {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -34,7 +75,10 @@ const PokemonListPage: React.FC = () => {
         if (!res.ok) throw new Error('Error al obtener los Pokémon');
         return res.json();
       })
-      .then((data: Pokemon[]) => setPokemons(data))
+      .then((data: PokeListModel) => {
+        setPokemons(data.list);
+        setTotalCount(data.recordCount);
+      })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
   }, [page, size]);
@@ -48,8 +92,11 @@ const PokemonListPage: React.FC = () => {
   const handlePrev = () => setPageParam(Math.max(0, page - 1));
   const handleNext = () => setPageParam(page + 1);
 
+  const totalPages = Math.max(1, Math.ceil(totalCount / size));
+
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', padding: 24, minHeight: 600, position: 'relative' }}>
+      <Toast message={error || ''} onClose={() => setError(null)} />
       <h1 style={{ textAlign: 'center', color: '#3b82f6', fontSize: 32, marginBottom: 24 }}>Pokémon List</h1>
       <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
         <label htmlFor="size-select">Pokémon por página: </label>
@@ -65,7 +112,6 @@ const PokemonListPage: React.FC = () => {
           <option value={12}>12</option>
         </select>
       </div>
-      {error && <p style={{ color: '#ff4f4f', textAlign: 'center' }}>{error}</p>}
       {/* Spinner centrado mientras loading */}
       {loading && (
         <div style={{
@@ -149,22 +195,23 @@ const PokemonListPage: React.FC = () => {
           type="number"
           min={1}
           value={inputPage}
+          max={totalPages}
           onChange={e => {
             setInputPage(e.target.value.replace(/^0+/, ''));
           }}
           onKeyDown={e => {
             if (e.key === 'Enter') {
               const val = Number(inputPage);
-              if (!isNaN(val) && val > 0) setPageParam(val - 1);
+              if (!isNaN(val) && val > 0 && val <= totalPages) setPageParam(val - 1);
             }
           }}
           disabled={loading}
           style={{ width: 60, padding: '6px 8px', borderRadius: 6, border: '1.5px solid #888', background: '#181c20', color: '#fff', fontSize: 16, textAlign: 'center', outline: 'none' }}
         />
-        <span style={{ alignSelf: 'center', fontSize: 16 }}>/</span>
+        <span style={{ alignSelf: 'center', fontSize: 16 }}>/ {totalPages}</span>
         <button
           onClick={handleNext}
-          disabled={pokemons.length < size || loading}
+          disabled={page + 1 >= totalPages || loading}
           style={{ padding: '8px 20px', borderRadius: 8, fontSize: 16, background: pokemons.length < size ? '#444' : '#3b82f6', color: '#fff', border: 'none', cursor: pokemons.length < size ? 'not-allowed' : 'pointer' }}
         >Siguiente</button>
       </div>
