@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import PokemonListPage from './page/PokemonListPage';
 import PokemonDetailPage from './page/PokemonDetailPage';
 
-const App: React.FC = () => {
+function App() {
   return (
     <BrowserRouter>
       <Routes>
@@ -13,6 +13,6 @@ const App: React.FC = () => {
       </Routes>
     </BrowserRouter>
   );
-};
+}
 
 export default App;
