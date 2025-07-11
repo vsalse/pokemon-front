@@ -1,81 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React from 'react';
 import Spinner from '../component/Spinner';
 import ImageWithLoader from '../component/ImageWithLoader';
-import { apiRequest } from '../utils/api';
 import Toast from '../component/Toast';
-
-interface Pokemon {
-  id: number;
-  name: string;
-  imageList: string;
-  typeList: string[];
-  abilitiesList: string[];
-  weight: number;
-}
-
-interface PokeListModel {
-  recordCount: number;
-  list: Pokemon[];
-}
+import { usePokemonList } from '../hook/usePokemonList';
 
 const PokemonListPage: React.FC = () => {
-  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<{ message: string, severity?: string } | null>(null);
-  const [searchParams, setSearchParams] = useSearchParams();
-  const page = Number(searchParams.get('page') || 1) - 1;
-  const [size, setSize] = useState<number>(3);
-  const [inputPage, setInputPage] = useState<string>((page + 1).toString());
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    setInputPage((page + 1).toString());
-  }, [page]);
-
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-    apiRequest<PokeListModel>('get', `/pokemon`, { params: { page, size } })
-      .then((data) => {
-        setPokemons(data.list);
-        setTotalCount(data.recordCount);
-      })
-      .catch(err => setError({ message: err.message, severity: err.severity || 'error' }))
-      .finally(() => setLoading(false));
-  }, [page, size]);
-
-  const setPageParam = (newPage: number) => {
-    setSearchParams(params => {
-      params.set('page', (newPage + 1).toString());
-      return params;
-    });
-  };
-  const handlePrev = () => setPageParam(Math.max(0, page - 1));
-  const handleNext = () => setPageParam(page + 1);
-
-  const totalPages = Math.max(1, Math.ceil(totalCount / size));
-
-  const handleClearCache = async () => {
-    try {
-      await apiRequest('get', '/pokemon/clear-cache');
-      setError({ message: 'Se limpió satisfactoriamente el cache', severity: 'success' });
-    } catch (err) {
-      let msg = 'Error al limpiar el cache';
-      let severity = 'error';
-      if (err && typeof err === 'object') {
-        if ('message' in err && typeof (err as any).message === 'string') msg = (err as any).message;
-        if ('severity' in err && typeof (err as any).severity === 'string') severity = (err as any).severity;
-      }
-      setError({ message: msg, severity });
-    }
-  };
+  const {
+    pokemons,
+    totalCount,
+    loading,
+    error,
+    setError,
+    page,
+    size,
+    setSize,
+    inputPage,
+    setInputPage,
+    totalPages,
+    handlePrev,
+    handleNext,
+    setPageParam,
+    handleClearCache,
+    navigate,
+    searchParams,
+  } = usePokemonList();
 
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', padding: 24, minHeight: 600, position: 'relative' }}>
       <Toast message={error?.message || ''} severity={error?.severity} onClose={() => setError(null)} />
-      <h1 style={{ textAlign: 'center', color: '#3b82f6', fontSize: 32, marginBottom: 24 }}>Pokemon List</h1>
+      <h1 style={{ textAlign: 'center', color: '#3b82f6', fontSize: 32, marginBottom: 24 }}>Lista de Pokemones</h1>
       <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
         <label htmlFor="size-select">Pokemones por página: </label>
         <select
@@ -116,7 +69,7 @@ const PokemonListPage: React.FC = () => {
       )}
       {/* Zona scrollable de la lista */}
       <div style={{
-        maxHeight: 520, // margen extra para que no se corte la última tarjeta
+        maxHeight: 520,
         minHeight: 152,
         overflowY: 'auto',
         marginBottom: 8,

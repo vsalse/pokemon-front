@@ -1,59 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import React from 'react';
 import Spinner from '../component/Spinner';
 import ImageWithLoader from '../component/ImageWithLoader';
-import { apiRequest } from '../utils/api';
 import Toast from '../component/Toast';
-
-interface PokemonDetail {
-  id: number;
-  name: string;
-  imageList: string;
-  typeList: string[];
-  abilitiesList: string[];
-  weight: number;
-  height: number;
-  species: {
-    evolutionChainUrl: string;
-    flavorText: string;
-  };
-  imageDetail: string;
-}
-
-interface PokeBasicModel {
-  id: number;
-  name: string;
-  imageList: string;
-  typeList: string[];
-  abilitiesList: string[];
-  weight: number;
-}
-
-interface PokemonDetailResponse {
-  data: PokemonDetail;
-  evolutionList: PokeBasicModel[][];
-}
+import { usePokemonDetail } from '../hook/usePokemonDetail';
 
 const PokemonDetailPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [pokemon, setPokemon] = useState<PokemonDetail | null>(null);
-  const [evolutionList, setEvolutionList] = useState<PokeBasicModel[][]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<{ message: string, severity?: string } | null>(null);
-
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-    apiRequest<PokemonDetailResponse>('get', `/pokemon/${id}`)
-      .then((data) => {
-        setPokemon(data.data);
-        setEvolutionList(data.evolutionList);
-      })
-      .catch(err => setError({ message: err.message, severity: err.severity || 'error' }))
-      .finally(() => setLoading(false));
-  }, [id]);
+  const {
+    pokemon,
+    evolutionList,
+    loading,
+    error,
+    setError,
+    navigate,
+    searchParams,
+    id,
+  } = usePokemonDetail();
 
   if (!pokemon) return null;
 
@@ -189,7 +150,7 @@ const PokemonDetailPage: React.FC = () => {
                 </div>
                 {idx < evolutionList.length - 1 && (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', margin: '0 12px' }}>
-                    <span style={{ fontSize: 32, color: '#e2b714' }}>→</span>
+                    <span style={{ fontSize: 32, color: '#e2b714' }}>{'\u2192'}</span>
                   </div>
                 )}
               </React.Fragment>
