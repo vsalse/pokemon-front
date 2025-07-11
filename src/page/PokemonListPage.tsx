@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Spinner from './Spinner';
 import ImageWithLoader from './ImageWithLoader';
+import { getApiUrl } from '../utils/api';
 
 function Toast({ message, onClose }: { message: string, onClose: () => void }) {
   const [visible, setVisible] = React.useState(false);
@@ -70,7 +71,7 @@ const PokemonListPage: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`http://localhost:8080/pokemon?page=${page}&size=${size}`)
+    fetch(`${getApiUrl()}/pokemon?page=${page}&size=${size}`)
       .then(res => {
         if (!res.ok) throw new Error('Error al obtener los Pokémon');
         return res.json();
