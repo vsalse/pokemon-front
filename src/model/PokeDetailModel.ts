@@ -1,7 +1,7 @@
 import { PokeCacheModel } from './PokeCacheModel';
 import { PokeBasicModel } from './PokeBasicModel';
 
-export interface PokemonDetailResponse {
+export interface PokeDetailModel {
   data: PokeCacheModel;
   evolutionList: PokeBasicModel[][];
 } 

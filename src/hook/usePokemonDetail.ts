@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { apiRequest } from '../utils/api';
 import { PokeCacheModel } from '../model/PokeCacheModel';
 import { PokeBasicModel } from '../model/PokeBasicModel';
-import { PokemonDetailResponse } from '../model/PokemonDetailResponse';
+import { PokeDetailModel } from '../model/PokeDetailModel';
 
 export function usePokemonDetail() {
   const { id } = useParams<{ id: string }>();
@@ -17,7 +17,7 @@ export function usePokemonDetail() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    apiRequest<PokemonDetailResponse>('get', `/pokemon/${id}`)
+    apiRequest<PokeDetailModel>('get', `/pokemon/${id}`)
       .then((data) => {
         setPokemon(data.data);
         setEvolutionList(data.evolutionList);
