@@ -1,43 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import Spinner from './Spinner';
-import ImageWithLoader from './ImageWithLoader';
-import { getApiUrl } from '../utils/api';
-
-function Toast({ message, onClose }: { message: string, onClose: () => void }) {
-  const [visible, setVisible] = React.useState(false);
-  React.useEffect(() => {
-    if (!message) return;
-    setVisible(true);
-    const timer = setTimeout(() => setVisible(false), 2700);
-    const timer2 = setTimeout(onClose, 3000);
-    return () => { clearTimeout(timer); clearTimeout(timer2); };
-  }, [message, onClose]);
-  if (!message && !visible) return null;
-  return (
-    <div style={{
-      position: 'fixed',
-      left: '50%',
-      bottom: 32,
-      transform: `translateX(-50%) translateY(${visible ? '0' : '120%'})`,
-      opacity: visible ? 1 : 0,
-      transition: 'transform 0.4s cubic-bezier(.4,1.3,.6,1), opacity 0.3s',
-      background: 'linear-gradient(90deg,#ff4f4f 60%,#e2b714 100%)',
-      color: '#fff',
-      padding: '16px 36px',
-      borderRadius: 14,
-      fontWeight: 700,
-      fontSize: 18,
-      boxShadow: '0 4px 24px #0007',
-      zIndex: 9999,
-      minWidth: 240,
-      textAlign: 'center',
-      letterSpacing: 0.5,
-      border: '2px solid #fff',
-      pointerEvents: 'none',
-    }}>{message}</div>
-  );
-}
+import Spinner from '../component/Spinner';
+import ImageWithLoader from '../component/ImageWithLoader';
+import { apiRequest } from '../utils/api';
+import Toast from '../component/Toast';
 
 interface Pokemon {
   id: number;
@@ -57,7 +23,7 @@ const PokemonListPage: React.FC = () => {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ message: string, severity?: string } | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page') || 1) - 1;
   const [size, setSize] = useState<number>(3);
@@ -71,16 +37,12 @@ const PokemonListPage: React.FC = () => {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`${getApiUrl()}/pokemon?page=${page}&size=${size}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Error al obtener los Pokémon');
-        return res.json();
-      })
-      .then((data: PokeListModel) => {
+    apiRequest<PokeListModel>('get', `/pokemon`, { params: { page, size } })
+      .then((data) => {
         setPokemons(data.list);
         setTotalCount(data.recordCount);
       })
-      .catch(err => setError(err.message))
+      .catch(err => setError({ message: err.message, severity: err.severity || 'error' }))
       .finally(() => setLoading(false));
   }, [page, size]);
 
@@ -95,12 +57,27 @@ const PokemonListPage: React.FC = () => {
 
   const totalPages = Math.max(1, Math.ceil(totalCount / size));
 
+  const handleClearCache = async () => {
+    try {
+      await apiRequest('get', '/pokemon/clear-cache');
+      setError({ message: 'Se limpió satisfactoriamente el cache', severity: 'success' });
+    } catch (err) {
+      let msg = 'Error al limpiar el cache';
+      let severity = 'error';
+      if (err && typeof err === 'object') {
+        if ('message' in err && typeof (err as any).message === 'string') msg = (err as any).message;
+        if ('severity' in err && typeof (err as any).severity === 'string') severity = (err as any).severity;
+      }
+      setError({ message: msg, severity });
+    }
+  };
+
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', padding: 24, minHeight: 600, position: 'relative' }}>
-      <Toast message={error || ''} onClose={() => setError(null)} />
-      <h1 style={{ textAlign: 'center', color: '#3b82f6', fontSize: 32, marginBottom: 24 }}>Pokémon List</h1>
+      <Toast message={error?.message || ''} severity={error?.severity} onClose={() => setError(null)} />
+      <h1 style={{ textAlign: 'center', color: '#3b82f6', fontSize: 32, marginBottom: 24 }}>Pokemon List</h1>
       <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
-        <label htmlFor="size-select">Pokémon por página: </label>
+        <label htmlFor="size-select">Pokemones por página: </label>
         <select
           id="size-select"
           value={size}
@@ -112,6 +89,13 @@ const PokemonListPage: React.FC = () => {
           <option value={6}>6</option>
           <option value={12}>12</option>
         </select>
+        <button
+          onClick={handleClearCache}
+          disabled={loading}
+          style={{ marginLeft: 12, padding: '4px 16px', fontSize: 15, borderRadius: 6, background: '#e2b714', color: '#23272f', fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 2px 8px #0002' }}
+        >
+          Limpiar caché
+        </button>
       </div>
       {/* Spinner centrado mientras loading */}
       {loading && (

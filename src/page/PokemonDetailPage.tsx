@@ -1,43 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import Spinner from './Spinner';
-import ImageWithLoader from './ImageWithLoader';
-import { getApiUrl } from '../utils/api';
-
-function Toast({ message, onClose }: { message: string, onClose: () => void }) {
-  const [visible, setVisible] = React.useState(false);
-  React.useEffect(() => {
-    if (!message) return;
-    setVisible(true);
-    const timer = setTimeout(() => setVisible(false), 2700);
-    const timer2 = setTimeout(onClose, 3000);
-    return () => { clearTimeout(timer); clearTimeout(timer2); };
-  }, [message, onClose]);
-  if (!message && !visible) return null;
-  return (
-    <div style={{
-      position: 'fixed',
-      left: '50%',
-      bottom: 32,
-      transform: `translateX(-50%) translateY(${visible ? '0' : '120%'})`,
-      opacity: visible ? 1 : 0,
-      transition: 'transform 0.4s cubic-bezier(.4,1.3,.6,1), opacity 0.3s',
-      background: 'linear-gradient(90deg,#ff4f4f 60%,#e2b714 100%)',
-      color: '#fff',
-      padding: '16px 36px',
-      borderRadius: 14,
-      fontWeight: 700,
-      fontSize: 18,
-      boxShadow: '0 4px 24px #0007',
-      zIndex: 9999,
-      minWidth: 240,
-      textAlign: 'center',
-      letterSpacing: 0.5,
-      border: '2px solid #fff',
-      pointerEvents: 'none',
-    }}>{message}</div>
-  );
-}
+import Spinner from '../component/Spinner';
+import ImageWithLoader from '../component/ImageWithLoader';
+import { apiRequest } from '../utils/api';
+import Toast from '../component/Toast';
 
 interface PokemonDetail {
   id: number;
@@ -75,21 +41,17 @@ const PokemonDetailPage: React.FC = () => {
   const [pokemon, setPokemon] = useState<PokemonDetail | null>(null);
   const [evolutionList, setEvolutionList] = useState<PokeBasicModel[][]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ message: string, severity?: string } | null>(null);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`${getApiUrl()}/pokemon/${id}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Error al obtener el detalle del Pokémon');
-        return res.json();
-      })
-      .then((data: PokemonDetailResponse) => {
+    apiRequest<PokemonDetailResponse>('get', `/pokemon/${id}`)
+      .then((data) => {
         setPokemon(data.data);
         setEvolutionList(data.evolutionList);
       })
-      .catch(err => setError(err.message))
+      .catch(err => setError({ message: err.message, severity: err.severity || 'error' }))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -97,7 +59,7 @@ const PokemonDetailPage: React.FC = () => {
 
   return (
     <div style={{ maxWidth: 600, margin: '0 auto', padding: 24, minHeight: 600, position: 'relative' }}>
-      <Toast message={error || ''} onClose={() => setError(null)} />
+      <Toast message={error?.message || ''} severity={error?.severity} onClose={() => setError(null)} />
       {/* Spinner centrado y fondo difuminado mientras loading */}
       {loading && (
         <div style={{
